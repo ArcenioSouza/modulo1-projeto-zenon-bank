@@ -3,13 +3,16 @@ package br.com.zenon.fraud;
 import br.com.zenon.fraud.domain.Customer;
 import br.com.zenon.fraud.domain.Transaction;
 import br.com.zenon.fraud.domain.TransactionType;
+import br.com.zenon.fraud.service.TransactionIngestor;
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class MainClass {
 
-    static void main() {
+    static void main() throws IOException {
         Customer clienteOrigem1 = new Customer(
                 "C1231006815",
                 new BigDecimal("170136.0"),
@@ -61,6 +64,16 @@ public class MainClass {
 
         System.out.println("Transaction 1: " + transaction1);
         System.out.println("Transaction 2: " + transaction2);
+
+        System.out.println("-------------------------------");
+
+        List<Transaction> list = TransactionIngestor.ingestor("data/TransactionList.csv");
+
+        list.forEach(transaction -> {
+            if(transaction.id() <= 10){
+                System.out.println(transaction);
+            }
+        });
 
     }
 

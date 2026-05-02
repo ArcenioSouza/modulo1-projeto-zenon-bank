@@ -1,9 +1,6 @@
 package br.com.zenon.fraud.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,6 +8,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 public class Customer {
     private String name;
     private BigDecimal oldBalance;
