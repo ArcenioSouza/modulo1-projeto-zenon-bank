@@ -3,7 +3,6 @@ package br.com.zenon.fraud.service;
 import br.com.zenon.fraud.domain.Customer;
 import br.com.zenon.fraud.domain.Transaction;
 import br.com.zenon.fraud.domain.TransactionType;
-import lombok.NoArgsConstructor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,12 +17,26 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+
+
+import java.util.Set;
+
 public class TransactionIngestor {
 
-    private TransactionIngestor() {
-        /* This utility class should not be instantiated */
-    }
+    private static final Validator VALIDATOR = Validation
+            .byDefaultProvider()
+            .configure()
+            .messageInterpolator(new ParameterMessageInterpolator())
+            .buildValidatorFactory()
+            .getValidator();
 
+    private TransactionIngestor() {
+    }
 
     public static List<Transaction> ingestor(String nameFile) throws IOException {
         List<Transaction> transactionsList = new ArrayList<>();
@@ -37,8 +50,16 @@ public class TransactionIngestor {
 
             String line;
             long id = 1L;
-            while ((line = reader.readLine()) != null && transactionsList.size() < 1000) {
-                transactionsList.add(toTransaction(line, id));
+            int readLines = 0;
+            while ((line = reader.readLine()) != null && readLines < 1000) {
+                readLines++;
+
+                try {
+                    transactionsList.add(toTransaction(line, id));
+                } catch (RuntimeException e) {
+                    System.err.println("Erro: " + line + " - " + e.getMessage());
+                }
+
                 id++;
             }
         }
@@ -48,6 +69,10 @@ public class TransactionIngestor {
 
     private static Transaction toTransaction(String line, long id) {
         String[] columns = line.split(",");
+
+        if (columns.length != 11) {
+            throw new IllegalArgumentException("Quantidade de colunas invalida: " + columns.length);
+        }
 
         Customer customerOrigem = Customer.builder()
                 .name(columns[3])
@@ -61,15 +86,34 @@ public class TransactionIngestor {
                 .newBalance(new BigDecimal(columns[8]))
                 .build();
 
-        return new Transaction(
+        Transaction transaction = new Transaction(
                 id,
                 Integer.parseInt(columns[0]),
                 TransactionType.fromString(columns[1]),
                 new BigDecimal(columns[2]),
                 customerOrigem,
                 customerDestino,
-                "1".equals(columns[9]),
-                "1".equals(columns[10])
-        );
+                parseBoolean(columns[9]),
+                parseBoolean(columns[10])
+            );
+
+        Set<ConstraintViolation<Transaction>> violations = VALIDATOR.validate(transaction);
+
+        if (!violations.isEmpty()) {
+            String message = violations.iterator().next().getMessage();
+            throw new IllegalArgumentException(message);
+        }
+
+        return transaction;
+    }
+
+    private static boolean parseBoolean(String value) {
+        if ("0".equals(value)) {
+            return false;
+        }
+        if ("1".equals(value)) {
+            return true;
+        }
+        throw new IllegalArgumentException("Valor booleano invalido: " + value);
     }
 }

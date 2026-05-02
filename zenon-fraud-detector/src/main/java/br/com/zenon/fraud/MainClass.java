@@ -62,10 +62,12 @@ public class MainClass {
         String transaction1 = gson.toJson(transacao1);
         String transaction2 = gson.toJson(transacao2);
 
+        System.out.println("\n------------- Transações criadas por builder ------------------\n");
+
         System.out.println("Transaction 1: " + transaction1);
         System.out.println("Transaction 2: " + transaction2);
 
-        System.out.println("-------------------------------");
+        System.out.println("\n--------------Transações criadas por arquivo csv -----------------\n");
 
         List<Transaction> list = TransactionIngestor.ingestor("data/TransactionList.csv");
 
@@ -74,6 +76,15 @@ public class MainClass {
                 System.out.println(transaction);
             }
         });
+
+        System.out.println("\n--------------Transações criadas por arquivo csv contendo erros tratados -----------------");
+
+        List<Transaction> listWithError = TransactionIngestor.ingestor("data/TransactionErrorList.csv");
+
+        listWithError.forEach(transaction -> {
+            System.out.println(transaction);
+        });
+
 
     }
 
