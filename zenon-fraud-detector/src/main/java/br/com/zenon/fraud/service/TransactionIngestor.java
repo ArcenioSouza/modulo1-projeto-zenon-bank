@@ -3,6 +3,10 @@ package br.com.zenon.fraud.service;
 import br.com.zenon.fraud.domain.Customer;
 import br.com.zenon.fraud.domain.Transaction;
 import br.com.zenon.fraud.domain.TransactionType;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,14 +20,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-
-
 import java.util.Set;
 
 public class TransactionIngestor {
@@ -38,7 +34,7 @@ public class TransactionIngestor {
     private TransactionIngestor() {
     }
 
-    public static List<Transaction> ingestor(String nameFile) throws IOException {
+    public static List<Transaction> ingestor(String nameFile, int qtdLines) throws IOException {
         List<Transaction> transactionsList = new ArrayList<>();
         Path path = Paths.get(nameFile);
 
@@ -51,7 +47,7 @@ public class TransactionIngestor {
             String line;
             long id = 1L;
             int readLines = 0;
-            while ((line = reader.readLine()) != null && readLines < 1000) {
+            while ((line = reader.readLine()) != null && readLines < qtdLines) {
                 readLines++;
 
                 try {

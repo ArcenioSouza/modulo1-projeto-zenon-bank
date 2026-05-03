@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class Customer {
     @NotNull(message = "Name não pode ser nulo")
     private String name;

@@ -1,6 +1,7 @@
 package br.com.zenon.fraud;
 
 import br.com.zenon.fraud.domain.Customer;
+import br.com.zenon.fraud.domain.FraudAnalyzer;
 import br.com.zenon.fraud.domain.Transaction;
 import br.com.zenon.fraud.domain.TransactionType;
 import br.com.zenon.fraud.service.TransactionIngestor;
@@ -69,7 +70,7 @@ public class MainClass {
 
         System.out.println("\n--------------Transações criadas por arquivo csv -----------------\n");
 
-        List<Transaction> list = TransactionIngestor.ingestor("data/TransactionList.csv");
+        List<Transaction> list = TransactionIngestor.ingestor("data/TransactionList.csv", 1000);
 
         list.forEach(transaction -> {
             if(transaction.id() <= 10){
@@ -79,12 +80,15 @@ public class MainClass {
 
         System.out.println("\n--------------Transações criadas por arquivo csv contendo erros tratados -----------------");
 
-        List<Transaction> listWithError = TransactionIngestor.ingestor("data/TransactionErrorList.csv");
+        List<Transaction> listWithError = TransactionIngestor.ingestor("data/TransactionErrorList.csv", 1000);
 
         listWithError.forEach(transaction -> {
             System.out.println(transaction);
         });
 
+        List<Transaction> listWithFraud = TransactionIngestor.ingestor("data/TransactionList.csv", 50000);
+
+        FraudAnalyzer.fraudReport(listWithFraud);
 
     }
 
